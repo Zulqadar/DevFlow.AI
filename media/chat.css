@@ -1,0 +1,91 @@
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+ body {
+     font-family: 'Inter', sans-serif;
+     background: #0a0a0a;
+ }
+
+ .message-bubble {
+     animation: slideIn 0.3s ease-out;
+ }
+
+ .message-bubble .msg {
+     white-space: pre-wrap;
+ }
+
+ .message-bubble .msg pre {
+     background: #1e1e1e;
+     padding: 8px;
+     border-radius: 4px;
+     overflow-x: auto;
+ }
+
+ .message-bubble .msg code {
+     font-family: monospace;
+     color: #dcdcaa;
+ }
+
+ @keyframes slideIn {
+     from {
+         opacity: 0;
+         transform: translateY(10px);
+     }
+
+     to {
+         opacity: 1;
+         transform: translateY(0);
+     }
+ }
+
+ .typing-indicator {
+     animation: pulse 1.5s ease-in-out infinite;
+ }
+
+ @keyframes pulse {
+
+     0%,
+     100% {
+         opacity: 0.4;
+     }
+
+     50% {
+         opacity: 1;
+     }
+ }
+
+ .send-button:hover {
+     transform: translateY(-1px);
+     box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+ }
+
+ .send-button:active {
+     transform: translateY(0);
+ }
+
+ .dark-gradient {
+     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+ }
+
+ .glass-dark {
+     backdrop-filter: blur(20px);
+     background: rgba(17, 24, 39, 0.8);
+     border: 1px solid rgba(75, 85, 99, 0.3);
+ }
+
+ .scrollbar-dark::-webkit-scrollbar {
+     width: 6px;
+ }
+
+ .scrollbar-dark::-webkit-scrollbar-track {
+     background: rgba(31, 41, 55, 0.5);
+     border-radius: 3px;
+ }
+
+ .scrollbar-dark::-webkit-scrollbar-thumb {
+     background: rgba(107, 114, 128, 0.5);
+     border-radius: 3px;
+ }
+
+ .scrollbar-dark::-webkit-scrollbar-thumb:hover {
+     background: rgba(107, 114, 128, 0.7);
+ }
