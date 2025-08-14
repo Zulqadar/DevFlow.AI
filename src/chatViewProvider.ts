@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { getNonce } from "./utils";
-import { callOpenRouter } from "./api/openrouter";
+import { callOpenRouter, callOpenRouterStream } from "./api/openrouter";
 
 export class ChatPanel {
     public static currentPanel: ChatPanel | undefined;
@@ -44,11 +44,20 @@ export class ChatPanel {
             async (message) => {
                 const userMessage = message.content;
                 // Show in UI immediately
-                await this.sendMessageToWebview({ role: "user", content: userMessage });
+                await this.sendMessageToWebview({ role: "user", content: userMessage, isStreaming: false });
 
+                let fullChunk = "";
                 // Get AI response
-                const AIResponse = await callOpenRouter(userMessage);
-                await this.sendMessageToWebview({ role: "ai", content: AIResponse });
+                const AIResponse = await callOpenRouterStream(userMessage, (chunk: string) => {
+                    // Send each chunk to the webview UI
+                    fullChunk += chunk;
+                    this.sendMessageToWebview({ role: "ai", content: chunk, isStreaming: true });
+                }, () => {
+                    console.log("Stream completed");
+                    this.sendMessageToWebviewWithParsing({ role: "ai", content: fullChunk, isStreaming: false });
+                });
+
+                //await this.sendMessageToWebview({ role: "ai", content: AIResponse });
             },
             null,
             this.disposables
@@ -58,11 +67,20 @@ export class ChatPanel {
     }
 
     public async sendMessageToWebview(message: any) {
+        this.panel.webview.postMessage({
+            role: message.role,
+            content: message.content,
+            isStreaming: message.isStreaming || false,
+        });
+    }
+
+    public async sendMessageToWebviewWithParsing(message: any) {
         const { marked } = await import("marked");
         const parsedMessage = message.role === "ai" ? marked.parse(message.content) : message.content;
         this.panel.webview.postMessage({
             role: message.role,
             content: parsedMessage,
+            isStreaming: message.isStreaming || false,
         });
     }
 
@@ -141,15 +159,6 @@ export class ChatPanel {
                         </svg>
                         Send
                     </button>
-                </div>
-
-                <!-- Status Bar -->
-                <div class="flex items-center justify-between mt-3 text-xs text-gray-500">
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <span>Connected</span>
-                    </div>
-                    <div>Press Enter to send • Shift+Enter for new line</div>
                 </div>
             </div>
         </div>

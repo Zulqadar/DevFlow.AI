@@ -4,15 +4,26 @@ const messagesContainer = document.getElementById('messages');
 const sendBtn = document.getElementById("sendBtn");
 const userInput = document.getElementById("userInput");
 
+let currentAIMessageElement = null;
+
 window.addEventListener("message", event => {
-    const { role, content } = event.data;
-    addMessage(content, role);
+    const { role, content, isStreaming } = event.data;
 
     if (role === "ai") {
+        if (isStreaming) {
+            // Append streaming content
+            appendToAIMessage(content);
+        } else {
+            // Final message (non-streaming or end of stream)
+            finalizeAIMessage(content);
+            sendBtn.disabled = false;
+            currentAIMessageElement = null;
+        }
+
         hideTypingIndicator();
-        sendBtn.disabled = false;
     }
-    else {
+    else if (role === "user") {
+        addMessage(content, role);
         showTypingIndicator();
         sendBtn.disabled = true;
     }
@@ -32,15 +43,12 @@ function sendMessage() {
     userInput.value = '';
     userInput.style.height = 'auto';
 
-    // send message to backend
     vscode.postMessage({ type: "user", content: message });
 }
 
 function addMessage(text, sender) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message-bubble flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
-
-    //   const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
     if (sender === 'user') {
         messageDiv.innerHTML = `
@@ -55,16 +63,36 @@ function addMessage(text, sender) {
               <div class="w-2 h-2 bg-green-400 rounded-full"></div>
               <span class="text-xs text-gray-400 font-medium">DevFlow</span>
             </div>
-            <p class="text-sm">${text}</p>
+            <p class="text-sm"></p>
           </div>
         `;
+        currentAIMessageElement = messageDiv.querySelector('p');
     }
 
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
+// Append tokens to AI message while streaming
+function appendToAIMessage(textChunk) {
+    if (!currentAIMessageElement) {
+        addMessage("", "ai"); // Create a bubble if not exists
+    }
+    currentAIMessageElement.innerHTML += textChunk;
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Finalize AI message (for non-streaming or after complete)
+function finalizeAIMessage(fullText) {
+    if (!currentAIMessageElement) {
+        addMessage(fullText, "ai");
+    } else {
+        currentAIMessageElement.innerHTML = fullText;
+    }
+}
+
 function showTypingIndicator() {
+    hideTypingIndicator(); // Ensure no duplicate
     const typingDiv = document.createElement('div');
     typingDiv.id = 'typing-indicator';
     typingDiv.className = 'message-bubble flex justify-start';
@@ -102,5 +130,4 @@ userInput.addEventListener('keypress', function (e) {
     }
 });
 
-// Focus input on load
 userInput.focus();

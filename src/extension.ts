@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { callOpenRouter } from './api/openrouter';
+import { callOpenRouter, callOpenRouterStream } from './api/openrouter';
 import { ChatPanel } from './chatViewProvider';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -43,13 +43,20 @@ export function activate(context: vscode.ExtensionContext) {
 			const panel = ChatPanel.currentPanel;
 
 			// Send the user's code to the webview UI
-			await panel?.sendMessageToWebview({ role: "user", content: codeToAnalyze });
+			await panel?.sendMessageToWebview({ role: "user", content: codeToAnalyze, isStreaming: false });
 
 			// Call OpenRouter and get the AI's response
-			const result = await callOpenRouter(codeToAnalyze);
+			let fullChunk = "";
+			const result = await callOpenRouterStream(codeToAnalyze, (chunk: string) => {
+				// Send each chunk to the webview UI
+				fullChunk += chunk;
+				panel?.sendMessageToWebview({ role: "ai", content: chunk, isStreaming: true });
+			}, () => {
+				panel?.sendMessageToWebviewWithParsing({ role: "ai", content: fullChunk, isStreaming: false });
+			 });
 
 			// Send the AI's response to the webview UI
-			await panel?.sendMessageToWebview({ role: "ai", content: result });
+			//await panel?.sendMessageToWebview({ role: "ai", content: result });
 		}
 	);
 

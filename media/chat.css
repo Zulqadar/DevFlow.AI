@@ -10,7 +10,7 @@
  }
 
  .message-bubble .msg {
-     white-space: pre-wrap;
+     white-space: pre-line;
  }
 
  .message-bubble .msg pre {
@@ -18,6 +18,11 @@
      padding: 8px;
      border-radius: 4px;
      overflow-x: auto;
+ }
+
+ .send-button {
+     position: relative;
+     top: -7px;
  }
 
  .message-bubble .msg code {
