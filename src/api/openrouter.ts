@@ -24,7 +24,7 @@ export async function callOpenRouter(code: string): Promise<string> {
         body: JSON.stringify({
             model: CURRENT_MODEL,
             messages: [
-                { role: "system", content: "You are a senior software architect. Analyze and improve the given code, suggest refactoring, SOLID principles, and architectural improvements." },
+                  { role: "system", content: "You are a senior software architect. Analyze and improve the given code, suggest refactoring, SOLID principles, and architectural improvements. When suggesting code improvements, always put the final replacement inside a single ```suggestion code block at the end of your response." },
                 { role: "user", content: code }
             ]
         })
@@ -49,7 +49,7 @@ export async function callOpenRouterStream(
             model: CURRENT_MODEL,
             stream: true, // IMPORTANT
             messages: [
-                { role: "system", content: "You are a senior software architect. Analyze and improve the given code, suggest refactoring, SOLID principles, and architectural improvements." },
+                { role: "system", content: "You are a senior software architect. Analyze and improve the given code, suggest refactoring, SOLID principles, and architectural improvements. When suggesting code improvements, always put the final replacement inside a single ```suggestion code block at the end of your response." },
                 { role: "user", content: code }
             ]
         })

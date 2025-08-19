@@ -17,7 +17,7 @@
 			],
 			"preLaunchTask": "${defaultBuildTask}",
 			"env": {
-				"OPENROUTER_API_KEY": "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"
+				"OPENROUTER_API_KEY": "YOUR_API_KEY"
 			}
 		}
 	]
